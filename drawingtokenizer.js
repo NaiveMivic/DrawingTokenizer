@@ -22,14 +22,17 @@
 		 * Convert the selected drawings to an png image
 		 */
 		static async convertDrawing(filename, drawings, type, quality) {
+			console.log("conversion start");
 			let container = new PIXI.Container();
 			const savedGridVisibility = canvas.grid.visible;
 
+			console.log("container");
 			//Deactivate the grid
 			canvas.grid.visible = false;
 
 			//canvas.drawings.releaseAll();
 			//Copy all drawings into a PIXI Container
+			console.log("copy all drawings");
 			for (let i = 0; i < drawings.length; i++) {
 				container.addChild(drawings[i].shape.clone());
 				container.children[i].transform = drawings[i].shape.transform;
@@ -46,6 +49,8 @@
 					filename += ".webp";
 					break;
 			}
+			
+			console.log("convert container to blob");
 			await DrawingTokenizer.convertContainerToBlobAndUpload(container, filename, type, quality);
 			
 			//Reactivate the grid	
@@ -76,6 +81,8 @@
 		 * Upload blob to foundry
 		 */
 		static async uploadToFoundry(data, filename) {
+			
+			console.log("upload to foundry");
 			// Create the form data to post
 			const fd = new FormData();
 			const path = DrawingTokenizer.getUploadPath();
@@ -84,6 +91,7 @@
 			fd.set("target", path);
 			fd.set("upload", test, filename);
 		
+			console.log("request dispatch");
 			// Dispatch the request
 			const request = await fetch('/upload', {method: "POST", body: fd});
 			if ( request.status === 413 ) {
@@ -92,6 +100,7 @@
 				return ui.notifications.error(game.i18n.localize("FILES.ErrorSomethingWrong"));
 			}
 		
+			console.log("server response");
 			// Retrieve the server response
 			const response = await request.json();
 			if (response.error) {
